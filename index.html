@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DAKODER++</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161921;
+    --surface2: #1e2330;
+    --border: #2a2f3d;
+    --accent: #7ee8a2;
+    --accent2: #5b9cf6;
+    --accent3: #f59e6b;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --danger: #f87171;
+    --success: #86efac;
+    --code-bg: #111318;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Nunito', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 20px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--muted); }
+  .xp-badge {
+    font-size: 12px;
+    font-family: var(--sans);
+    color: var(--accent3);
+    background: rgba(245,158,107,0.1);
+    border: 1px solid rgba(245,158,107,0.25);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* Progress */
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+  .progress-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--sans);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Tab nav */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Screens */
+  .screen { display: none; padding: 16px; min-height: calc(100vh - 160px); }
+  .screen.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card-accent-green { border-left: 3px solid var(--accent); }
+  .card-accent-blue { border-left: 3px solid var(--accent2); }
+  .card-accent-orange { border-left: 3px solid var(--accent3); }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .tag.beginner { background: rgba(126,232,162,0.12); color: var(--accent); border: 1px solid rgba(126,232,162,0.25); }
+  .tag.intermediate { background: rgba(245,158,107,0.12); color: var(--accent3); border: 1px solid rgba(245,158,107,0.25); }
+
+  .card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .card p {
+    font-size: 14px;
+    color: #a0aec0;
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* Code block */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 12px 0;
+    color: #cdd6f4;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kw { color: #cba6f7; }
+  .str { color: #a6e3a1; }
+  .num { color: #fab387; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .fn { color: #89b4fa; }
+  .op { color: #89dceb; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #0d0f14; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+  /* Lesson dots */
+  .lesson-dots {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-family: var(--sans);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    background: var(--surface);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .dot.done { background: rgba(126,232,162,0.15); border-color: var(--accent); color: var(--accent); }
+  .dot.current { background: rgba(91,156,246,0.15); border-color: var(--accent2); color: var(--accent2); }
+
+  /* Quiz */
+  .quiz-q {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .quiz-opt {
+    width: 100%;
+    text-align: left;
+    padding: 13px 16px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quiz-opt:active { transform: scale(0.98); }
+  .quiz-opt.correct { background: rgba(126,232,162,0.12); border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.wrong { background: rgba(248,113,113,0.1); border-color: var(--danger); color: var(--danger); }
+  .feedback {
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 10px;
+  }
+  .feedback.correct { background: rgba(126,232,162,0.1); color: var(--success); border: 1px solid rgba(126,232,162,0.2); }
+  .feedback.wrong { background: rgba(248,113,113,0.08); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+  .score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .score-pill {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--accent2);
+    background: rgba(91,156,246,0.1);
+    border: 1px solid rgba(91,156,246,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* Sandbox */
+  .sandbox-editor {
+    width: 100%;
+    min-height: 180px;
+    background: var(--code-bg);
+    color: #cdd6f4;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    resize: vertical;
+    outline: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sandbox-editor:focus { border-color: var(--accent2); }
+  .output-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 70px;
+    color: var(--accent);
+    line-height: 1.8;
+    white-space: pre-wrap;
+  }
+  .output-label {
+    font-size: 11px;
+    font-family: var(--sans);
+    color: var(--muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .hint-box {
+    background: rgba(91,156,246,0.08);
+    border: 1px solid rgba(91,156,246,0.2);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #7eb8f7;
+    margin-bottom: 12px;
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+
+  /* Sandbox challenges */
+  .challenge-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .challenge-card:hover { border-color: var(--accent3); }
+  .challenge-card h4 { font-size: 14px; font-weight: 600; color: var(--accent3); margin-bottom: 4px; }
+  .challenge-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Finish screen */
+  .finish-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .finish-screen .big-num {
+    font-size: 64px;
+    font-family: var(--sans);
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .finish-screen p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">DAKODER<span>++</span></div>
+    <div class="xp-badge" id="xp-badge">0 XP</div>
+  </div>
+  <div class="progress-label">
+    <span id="prog-label">0 of 8 lessons done</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('lessons')">📖 Lessons</button>
+  <button class="tab" onclick="switchTab('quiz')">⚡ Quiz</button>
+  <button class="tab" onclick="switchTab('sandbox')">🛠 Sandbox</button>
+</div>
+
+<!-- LESSONS -->
+<div id="lessons" class="screen active">
+  <div class="lesson-dots" id="dots"></div>
+  <div id="lesson-content"></div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div id="quiz-content"></div>
+</div>
+
+<!-- SANDBOX -->
+<div id="sandbox" class="screen">
+  <div class="card card-accent-blue" style="margin-bottom:14px;">
+    <div class="tag intermediate">Sandbox</div>
+    <h2>Code playground</h2>
+    <p>Write C++ below and tap Run. The simulator reads your <code style="color:var(--accent2);font-family:var(--mono);">cout</code> statements and shows the output — try it!</p>
+  </div>
+
+  <p style="font-size:12px;font-family:var(--mono);color:var(--muted);margin-bottom:8px;letter-spacing:0.06em;text-transform:uppercase;">Quick challenges</p>
+  <div class="challenge-card" onclick="loadChallenge(0)">
+    <h4>Challenge 1 — Say hello</h4>
+    <p>Print your name to the screen using cout.</p>
+  </div>
+  <div class="challenge-card" onclick="loadChallenge(1)">
+    <h4>Challenge 2 — Count to 5</h4>
+    <p>Use a for loop to print numbers 1 through 5.</p>
+  </div>
+  <div class="challenge-card" onclick="loadChallenge(2)">
+    <h4>Challenge 3 — Age check</h4>
+    <p>Store an age in a variable and print if they're a minor or adult.</p>
+  </div>
+
+  <div style="margin-top:16px;">
+    <p class="output-label">Your code</p>
+    <textarea class="sandbox-editor" id="code-editor" spellcheck="false">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    cout &lt;&lt; "Hello, World!" &lt;&lt; endl;
+    return 0;
+}</textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="runCode()">▶ Run</button>
+      <button class="btn btn-secondary" onclick="clearEditor()">Clear</button>
+    </div>
+  </div>
+
+  <div style="margin-top:16px;">
+    <p class="output-label">Output</p>
+    <div class="output-box" id="output-box">Press Run to see your output...</div>
+  </div>
+
+  <div class="hint-box" id="sandbox-hint" style="margin-top:14px;">
+    Tip: use cout &lt;&lt; "text" &lt;&lt; endl; to print a line.
+  </div>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const lessons = [
+  {
+    title: "What is C++?",
+    tag: "beginner",
+    accent: "green",
+    body: "C++ is one of the most powerful programming languages ever made. It's used to build video games, operating systems, browsers, and apps that need to run fast.",
+    extra: "Think of writing code like giving instructions to a robot. C++ lets you be very precise — the computer does exactly what you say, nothing more.",
+    code: null,
+    xp: 10
+  },
+  {
+    title: "Your first program",
+    tag: "beginner",
+    accent: "green",
+    body: "Every C++ program has a main() function — it's where execution starts. The cout command prints text to the screen.",
+    extra: "The #include tells the program to load tools for input/output. endl moves the cursor to a new line.",
+    code: `<span class="kw">#include</span> <span class="str">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Hello, World!"</span> <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}`,
+    xp: 15
+  },
+  {
+    title: "Variables",
+    tag: "beginner",
+    accent: "green",
+    body: "A variable is a named box that stores a value. You must tell C++ what type of value it holds: int for whole numbers, double for decimals, string for text, bool for true/false.",
+    extra: "Variable names are case-sensitive — myAge and myage are different. Pick clear names so your code is easy to read.",
+    code: `<span class="kw">int</span> age <span class="op">=</span> <span class="num">20</span>;
+<span class="kw">double</span> price <span class="op">=</span> <span class="num">9.99</span>;
+<span class="kw">string</span> name <span class="op">=</span> <span class="str">"Alex"</span>;
+<span class="kw">bool</span> isLearning <span class="op">=</span> <span class="kw">true</span>;
+
+cout <span class="op">&lt;&lt;</span> name <span class="op">&lt;&lt;</span> <span class="str">" is "</span> <span class="op">&lt;&lt;</span> age <span class="op">&lt;&lt;</span> endl;`,
+    xp: 15
+  },
+  {
+    title: "User input with cin",
+    tag: "beginner",
+    accent: "green",
+    body: "You can ask the user to type something using cin. Whatever they enter gets saved into a variable you created.",
+    extra: "cin >> waits for the user to press Enter. The value lands in your variable and you can use it after.",
+    code: `<span class="kw">int</span> age;
+cout <span class="op">&lt;&lt;</span> <span class="str">"Enter your age: "</span>;
+cin <span class="op">&gt;&gt;</span> age;
+cout <span class="op">&lt;&lt;</span> <span class="str">"You are "</span> <span class="op">&lt;&lt;</span> age <span class="op">&lt;&lt;</span> <span class="str">" years old."</span> <span class="op">&lt;&lt;</span> endl;`,
+    xp: 15
+  },
+  {
+    title: "If / Else — making decisions",
+    tag: "beginner",
+    accent: "blue",
+    body: "If/else lets your program take different paths depending on a condition. If the condition is true, the first block runs. Otherwise the else block runs.",
+    extra: "You can stack multiple options with else if. The computer checks each condition top to bottom and runs the first one that's true.",
+    code: `<span class="kw">int</span> score <span class="op">=</span> <span class="num">85</span>;
+
+<span class="kw">if</span> (score <span class="op">&gt;=</span> <span class="num">90</span>) {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Grade: A"</span> <span class="op">&lt;&lt;</span> endl;
+} <span class="kw">else if</span> (score <span class="op">&gt;=</span> <span class="num">80</span>) {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Grade: B"</span> <span class="op">&lt;&lt;</span> endl;
+} <span class="kw">else</span> {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Grade: C or below"</span> <span class="op">&lt;&lt;</span> endl;
+}`,
+    xp: 20
+  },
+  {
+    title: "Loops — repeating code",
+    tag: "beginner",
+    accent: "blue",
+    body: "A loop runs a block of code multiple times automatically. A for loop runs a fixed number of times. A while loop keeps running as long as a condition stays true.",
+    extra: "Loops save you from copy-pasting the same line. Any time you think 'do this 10 times', use a loop.",
+    code: `<span class="cmt">// for loop — counts 1 to 5</span>
+<span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">1</span>; i <span class="op">&lt;=</span> <span class="num">5</span>; i<span class="op">++</span>) {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"Count: "</span> <span class="op">&lt;&lt;</span> i <span class="op">&lt;&lt;</span> endl;
+}
+
+<span class="cmt">// while loop</span>
+<span class="kw">int</span> x <span class="op">=</span> <span class="num">0</span>;
+<span class="kw">while</span> (x <span class="op">&lt;</span> <span class="num">3</span>) {
+    cout <span class="op">&lt;&lt;</span> <span class="str">"x = "</span> <span class="op">&lt;&lt;</span> x <span class="op">&lt;&lt;</span> endl;
+    x<span class="op">++</span>;
+}`,
+    xp: 20
+  },
+  {
+    title: "Functions",
+    tag: "intermediate",
+    accent: "orange",
+    body: "A function is a named, reusable block of code. You define it once and call it as many times as you want. Functions can take inputs (parameters) and return a result.",
+    extra: "Breaking code into functions is one of the most important habits in programming. It keeps things clean and easy to debug.",
+    code: `<span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">return</span> a <span class="op">+</span> b;
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="kw">int</span> result <span class="op">=</span> <span class="fn">add</span>(<span class="num">5</span>, <span class="num">3</span>);
+    cout <span class="op">&lt;&lt;</span> <span class="str">"5 + 3 = "</span> <span class="op">&lt;&lt;</span> result <span class="op">&lt;&lt;</span> endl;
+    <span class="kw">return</span> <span class="num">0</span>;
+}`,
+    xp: 25
+  },
+  {
+    title: "Arrays",
+    tag: "intermediate",
+    accent: "orange",
+    body: "An array stores multiple values of the same type in a row. Each value has an index starting at 0. Arrays let you work with lists of data efficiently.",
+    extra: "A common beginner mistake: trying to access index 5 in a 5-item array. The last index is always length - 1 (so index 4 for 5 items).",
+    code: `<span class="kw">int</span> scores[<span class="num">3</span>] <span class="op">=</span> {<span class="num">90</span>, <span class="num">75</span>, <span class="num">88</span>};
+
+cout <span class="op">&lt;&lt;</span> scores[<span class="num">0</span>] <span class="op">&lt;&lt;</span> endl; <span class="cmt">// 90</span>
+cout <span class="op">&lt;&lt;</span> scores[<span class="num">1</span>] <span class="op">&lt;&lt;</span> endl; <span class="cmt">// 75</span>
+cout <span class="op">&lt;&lt;</span> scores[<span class="num">2</span>] <span class="op">&lt;&lt;</span> endl; <span class="cmt">// 88</span>`,
+    xp: 25
+  }
+];
+
+const quizzes = [
+  { q: "What does cout do in C++?", opts: ["Reads user input","Prints text to screen","Creates a variable","Loops code"], ans: 1, exp: "cout (character output) prints text to the screen." },
+  { q: "Which variable type stores a whole number?", opts: ["string","double","int","bool"], ans: 2, exp: "int stores whole numbers like 5, 100, or -3." },
+  { q: "What is at index 0 in an array?", opts: ["The last item","Doesn't exist","The second item","The first item"], ans: 3, exp: "C++ arrays start at index 0, so [0] is always the first item." },
+  { q: "What does a function do?", opts: ["Deletes variables","Stores a list","Only runs once","Groups reusable code"], ans: 3, exp: "Functions group code you can reuse by calling its name." },
+  { q: "Which keyword checks a condition?", opts: ["for","cout","if","int"], ans: 2, exp: "if checks whether a condition is true and runs code if so." },
+  { q: "What does cin do?", opts: ["Prints text","Takes user input","Creates a loop","Makes a function"], ans: 1, exp: "cin reads what the user types on the keyboard." },
+  { q: "How many times does 'for(int i=0; i<3; i++)' loop?", opts: ["2 times","4 times","3 times","Infinite"], ans: 2, exp: "i runs for 0, 1, 2 — that's 3 iterations." },
+  { q: "What does 'return 0;' mean in main()?", opts: ["Exit with error","Print zero","Program succeeded","Skip line"], ans: 2, exp: "return 0 tells the OS the program finished successfully." }
+];
+
+const challenges = [
+  `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Print your name!\n    cout << "My name is " << endl;\n    return 0;\n}`,
+  `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Use a for loop to count 1 to 5\n    for (int i = 1; i <= 5; i++) {\n        cout << i << endl;\n    }\n    return 0;\n}`,
+  `#include <iostream>\nusing namespace std;\n\nint main() {\n    int age = 17;\n    if (age >= 18) {\n        cout << "Adult" << endl;\n    } else {\n        cout << "Minor" << endl;\n    }\n    return 0;\n}`
+];
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let curLesson = 0;
+let doneLessons = new Set();
+let curQuiz = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let totalXP = 0;
+
+// ─── TABS ───────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', ['lessons','quiz','sandbox'][i] === t);
+  });
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById(t).classList.add('active');
+  if (t === 'lessons') renderLesson();
+  if (t === 'quiz') renderQuiz();
+}
+
+// ─── PROGRESS ───────────────────────────────────────────────────────────────
+function updateProgress() {
+  const pct = Math.round((doneLessons.size / lessons.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = doneLessons.size + ' of ' + lessons.length + ' lessons done';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('xp-badge').textContent = totalXP + ' XP';
+}
+
+// ─── DOTS ───────────────────────────────────────────────────────────────────
+function renderDots() {
+  const c = document.getElementById('dots');
+  c.innerHTML = '';
+  lessons.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (doneLessons.has(i) ? ' done' : '') + (i === curLesson ? ' current' : '');
+    d.textContent = i + 1;
+    d.onclick = () => { curLesson = i; renderLesson(); };
+    c.appendChild(d);
+  });
+}
+
+// ─── LESSONS ────────────────────────────────────────────────────────────────
+function renderLesson() {
+  const l = lessons[curLesson];
+  const isDone = doneLessons.has(curLesson);
+  document.getElementById('lesson-content').innerHTML = `
+    <div class="card card-accent-${l.accent}">
+      <span class="tag ${l.tag}">${l.tag}</span>
+      <h2>${l.title}</h2>
+      <p>${l.body}</p>
+      <p style="font-size:13px; color:var(--muted);">${l.extra}</p>
+      ${l.code ? `<div class="code-block">${l.code}</div>` : ''}
+      <div class="btn-row">
+        ${curLesson > 0 ? '<button class="btn btn-secondary" onclick="goLesson(-1)">← Back</button>' : ''}
+        <button class="btn btn-primary" onclick="completeLesson()">${isDone ? (curLesson < lessons.length - 1 ? 'Next →' : 'Done!') : (curLesson < lessons.length - 1 ? 'Got it →' : 'Finish!')}</button>
+      </div>
+      ${!isDone ? `<p style="font-size:11px;color:var(--muted);margin-top:10px;font-family:var(--sans);">+${l.xp} XP on completion</p>` : ''}
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);font-family:var(--sans);">Lesson ${curLesson+1} of ${lessons.length}</p>
+  `;
+  renderDots();
+}
+
+function goLesson(dir) {
+  curLesson = Math.max(0, Math.min(lessons.length - 1, curLesson + dir));
+  renderLesson();
+}
+
+function completeLesson() {
+  if (!doneLessons.has(curLesson)) {
+    totalXP += lessons[curLesson].xp;
+    doneLessons.add(curLesson);
+    updateProgress();
+  }
+  if (curLesson < lessons.length - 1) {
+    curLesson++;
+    renderLesson();
+  } else {
+    renderDots();
+    document.getElementById('lesson-content').innerHTML = `
+      <div class="card" style="text-align:center; padding:32px 18px;">
+        <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+        <h2 style="margin-bottom:8px;">All lessons complete!</h2>
+        <p>Head to the Quiz tab to test your knowledge.</p>
+        <div class="btn-row" style="justify-content:center;margin-top:16px;">
+          <button class="btn btn-primary" onclick="switchTab('quiz')">Take the quiz →</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ─── QUIZ ───────────────────────────────────────────────────────────────────
+function renderQuiz() {
+  if (curQuiz >= quizzes.length) {
+    const pct = Math.round((quizScore / quizzes.length) * 100);
+    document.getElementById('quiz-content').innerHTML = `
+      <div class="card" style="text-align:center; padding:32px 18px;">
+        <div class="finish-screen">
+          <div class="big-num">${quizScore}/${quizzes.length}</div>
+          <p>${pct}% correct</p>
+          <p style="margin-bottom:20px;">${quizScore >= 6 ? "Solid! You've got the basics down. 🔥" : "Keep reviewing the lessons — you'll get there!"}</p>
+          <div class="btn-row" style="justify-content:center;">
+            <button class="btn btn-primary" onclick="restartQuiz()">Try again</button>
+            <button class="btn btn-secondary" onclick="switchTab('lessons')">Review lessons</button>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  const q = quizzes[curQuiz];
+  quizAnswered = false;
+  document.getElementById('quiz-content').innerHTML = `
+    <div class="score-row">
+      <span style="font-size:13px; color:var(--muted); font-family:var(--sans);">Q${curQuiz+1} of ${quizzes.length}</span>
+      <span class="score-pill">${quizScore} correct</span>
+    </div>
+    <div class="card">
+      <p class="quiz-q">${q.q}</p>
+      ${q.opts.map((o,i) => `<button class="quiz-opt" id="opt${i}" onclick="answerQuiz(${i})">${o}</button>`).join('')}
+      <div id="qfb"></div>
+    </div>
+  `;
+}
+
+function answerQuiz(i) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = quizzes[curQuiz];
+  document.querySelectorAll('.quiz-opt').forEach(el => el.style.pointerEvents = 'none');
+  const fb = document.getElementById('qfb');
+  if (i === q.ans) {
+    document.getElementById('opt'+i).classList.add('correct');
+    fb.innerHTML = `<div class="feedback correct">✓ Correct! ${q.exp}</div>`;
+    quizScore++;
+    totalXP += 5;
+    updateProgress();
+  } else {
+    document.getElementById('opt'+i).classList.add('wrong');
+    document.getElementById('opt'+q.ans).classList.add('correct');
+    fb.innerHTML = `<div class="feedback wrong">✗ Not quite. ${q.exp}</div>`;
+  }
+  fb.innerHTML += `<button class="btn btn-primary" style="margin-top:12px;" onclick="nextQuiz()">Next →</button>`;
+}
+
+function nextQuiz() { curQuiz++; renderQuiz(); }
+function restartQuiz() { curQuiz = 0; quizScore = 0; renderQuiz(); }
+
+// ─── SANDBOX ────────────────────────────────────────────────────────────────
+function loadChallenge(n) {
+  document.getElementById('code-editor').value = challenges[n];
+  document.getElementById('output-box').textContent = 'Press Run to see output...';
+  document.getElementById('sandbox-hint').textContent = 'Challenge loaded! Edit the code and hit Run.';
+  document.getElementById('code-editor').scrollIntoView({ behavior: 'smooth' });
+}
+
+function clearEditor() {
+  document.getElementById('code-editor').value = '#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}';
+  document.getElementById('output-box').textContent = 'Press Run to see output...';
+}
+
+function runCode() {
+  const raw = document.getElementById('code-editor').value
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+  const out = document.getElementById('output-box');
+  const lines = [];
+  const coutRx = /cout\s*<<\s*((?:"[^"]*"|[^;<\n]+)(?:\s*<<\s*(?:"[^"]*"|[^;<\n]+))*)\s*;/g;
+  let m;
+  while ((m = coutRx.exec(raw)) !== null) {
+    const parts = m[1].split('<<').map(p => p.trim());
+    let result = '';
+    parts.forEach(p => {
+      if (p === 'endl' || p === '"\\n"') {
+        result += '\n';
+      } else if (p.startsWith('"') && p.endsWith('"')) {
+        result += p.slice(1,-1);
+      } else {
+        const numMatch = raw.match(new RegExp('\\b' + p + '\\s*=\\s*([\\d.]+)'));
+        const strMatch = raw.match(new RegExp('\\b' + p + '\\s*=\\s*"([^"]*)"'));
+        if (numMatch) result += numMatch[1];
+        else if (strMatch) result += strMatch[1];
+        else result += p;
+      }
+    });
+    lines.push(result);
+  }
+  if (lines.length === 0) {
+    out.textContent = raw.includes('main') ? '(No output — use cout << "text" << endl; inside main)' : '(Paste a valid C++ program with main())';
+  } else {
+    out.textContent = lines.join('').replace(/\n$/, '') || '(empty output)';
+  }
+  document.getElementById('sandbox-hint').textContent = 'Tip: change the text in quotes and run again!';
+  totalXP += 2;
+  updateProgress();
+}
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+renderLesson();
+renderDots();
+updateProgress();
+</script>
+</body>
+</html>
